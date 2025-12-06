@@ -26,10 +26,10 @@ jobs:
 
       - name: Build Executable
         run: |
-          pyinstaller --onefile --noconsole --name AirBeam ^
-            --add-data "airbeam/static;static" ^
-            --add-data "airbeam/templates;templates" ^
-            airbeam/main.py
+          pyinstaller --onefile --noconsole --name AirBeam `
+          --add-data "airbeam/static;static" `
+          --add-data "airbeam/templates;templates" `
+          airbeam/main.py
 
       - name: Upload EXE Artifact
         uses: actions/upload-artifact@v4
