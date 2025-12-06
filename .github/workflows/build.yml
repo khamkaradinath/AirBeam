@@ -1,17 +1,22 @@
-name: Build Windows EXE
+name: Build & Release Windows EXE
 
 on:
   push:
-    branches: ["main"]
+    tags:
+      - "v*.*.*" # Runs when pushing a version tag like v1.0.0
   workflow_dispatch:
+
+permissions:
+  contents: write # Allow release creation
+  actions: read
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4 # also updated
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -24,16 +29,17 @@ jobs:
           pip install pyinstaller
           pip install -r requirements.txt
 
-      - name: Build Executable
+      - name: Build EXE
         run: |
           pyinstaller --onefile --noconsole --name AirBeam `
-          --add-data "airbeam/static;static" `
-          --add-data "airbeam/templates;templates" `
-          airbeam/main.py
+            --add-data "airbeam/static;static" `
+            --add-data "airbeam/templates;templates" `
+            airbeam/main.py
 
-      - name: Upload EXE Artifact
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        id: release
+        uses: softprops/action-gh-release@v2
         with:
-          name: AirBeam-windows
-          path: dist/AirBeam.exe
-          retention-days: 7
+          files: dist/AirBeam.exe # Upload EXE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
