@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+    <title>{{app_name}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+<div class="center">
+<div class="card">
+
+<h1>{{app_name}}</h1>
+
+<div class="qr">
+    <img src="data:image/png;base64,{{qr}}">
+    <div class="ip-box">{{ip}}:{{port}}</div>
+</div>
+
+<div class="upload-box" onclick="document.getElementById('file').click()">
+    Tap to choose file,<br>or drop here
+</div>
+
+<div id="progress-text">Uploading...</div>
+<div id="progress-container">
+    <div id="progress-bar"></div>
+</div>
+
+<input id="file" type="file" onchange="uploadFile()">
+
+{% if files %}
+<div class="table-title">Files</div>
+
+<div class="table-wrapper">
+<table>
+<tr>
+    <th>Name</th>
+    <th>Size</th>
+    <th>Date</th>
+    <th>Action</th>
+</tr>
+
+{% for f in files %}
+<tr>
+    <td class="filename-cell" title="{{f.name}}">{{f.name}}</td>
+    <td>{{f.size}}</td>
+    <td>{{f.date}}</td>
+    <td class="actions">
+        <a href="/files/{{f.name}}" class="btn-download">Download</a>
+        <form style="display:inline;" method="POST" action="/delete">
+            <input type="hidden" name="filename" value="{{f.name}}">
+            <button class="btn-delete" type="submit">Delete</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
+</div>
+</div>
+
+<script>
+function uploadFile(){
+    const file = document.getElementById('file').files[0];
+    if(!file) return;
+
+    var formData = new FormData();
+    formData.append("file", file);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/upload", true);
+
+    xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){
+            let percent = (e.loaded / e.total) * 100;
+            document.getElementById("progress-container").style.display = "block";
+            document.getElementById("progress-text").style.display = "block";
+            document.getElementById("progress-bar").style.width = percent + "%";
+            document.getElementById("progress-text").innerText =
+                "Uploading... " + Math.floor(percent) + "%";
+        }
+    };
+
+    xhr.onload = function(){
+        window.location.reload();
+    };
+
+    xhr.send(formData);
+}
+</script>
+
+</body>
+</html>

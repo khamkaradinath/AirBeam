@@ -1,0 +1,6 @@
+qrcode
+FastAPI
+uvicorn[standard]
+pystray
+python-multipart
+jinja2
